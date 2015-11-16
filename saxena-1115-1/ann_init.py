@@ -16,15 +16,20 @@ hid1Layer = SigmoidLayer(2, 'hiddenlyr')
 # Creation of the Output layer.
 outLayer = LinearLayer(1, 'outlyr')
 
+# Instantiating the Bias Unit.
+bias_val = BiasUnit()
+
 # Adding the corresponding layers to the network.
 annet.addInputModule(inLayer)
-annet.addInputModule(hid1Layer)
+annet.addModule(hid1Layer)
+annet.addModule(bias_val)
 annet.addOutputModule(outLayer)
 
 # Adding the connections b/w layers pair-wise.
 # Note
 # FullConnection denotes all the nodes of one layer are connected to all nodes in the next layer.
 annet.addConnection(FullConnection(inLayer, hid1Layer))
+annet.addConnection(FullConnection(bias_val, hid1Layer))
 annet.addConnection(FullConnection(hid1Layer, outLayer))
 
 # The method performs internal management of the specifications.
