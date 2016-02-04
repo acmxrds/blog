@@ -1,0 +1,131 @@
+# XRDS BLOG: R software and tools for everyday use - Sample 2
+
+
+## Loading and preprocessing the data
+```{r}
+data<-read.csv("activity.csv",header = TRUE, sep = ",")
+```
+
+
+
+## What is mean total number of steps taken per day?
+```{r}
+#omit NA values
+data2<-data[complete.cases(data),]
+sums<-aggregate(data2$steps, by=list(data2$date), FUN=sum,na.rm = FALSE)
+#change columns names
+colnames(sums)<-c("date","sum")
+print(sums)
+
+library(ggplot2)
+library(gridExtra) 
+#histogram
+ggplot(sums,aes(x=date,y=sum)) + geom_bar(stat="identity") +xlab("Date") + ylab("Num Steps")+ggtitle("Histogram  total number of steps taken each day")
+
+#Calculate and report the mean total number of steps taken per day
+smean<-aggregate(data2$steps, by=list(data2$date), FUN=mean)
+colnames(smean)<-c("date","mean")
+print(smean)
+
+#Calculate and report the median total number of steps taken per day
+smedian<-aggregate(data2$steps, by=list(data2$date), FUN=median)
+colnames(smedian)<-c("date","median")
+print(smedian)
+
+```
+
+
+
+## What is the average daily activity pattern?
+
+```{r}
+#calculate new mean for intervals
+smean2<-aggregate(data2$steps, by=list(data2$interval), FUN=mean)
+colnames(smean2)<-c("interval","mean")
+plot(smean2$interval,smean2$mean,main="Avg steps ~ interval",xlab="interval",ylab="Avg steps",col="black",type="l")
+
+
+#Which 5-minute interval, on average across all the days in the dataset, 
+#contains the maximum number of steps?
+smean2[which.max(smean2$mean),]
+```
+
+
+## Imputing missing values
+```{r}
+#The NA values will be replaced by its interval mean value
+
+
+#calculate rows with NA values
+dataNA <- subset(data, is.na(data$steps))
+emptyRows<-nrow(dataNA)
+print(paste("Total columns with missing values",emptyRows))
+
+#Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+data3<-data
+y <- which(is.na(data3$steps))         # get index of NA values 
+
+# replace all NA for its interval MEAN values 
+data3$steps[y] <-smean2[ smean2$interval %in%  data3$interval[y],]$mean 
+
+
+#create df for the new histogram
+sumsData3<-aggregate(data3$steps, by=list(data3$date), FUN=sum,na.rm = FALSE)
+#change the columns name
+colnames(sumsData3)<-c("date","sum")
+
+ggplot(sumsData3,aes(x=date,y=sum)) + geom_bar(stat="identity")+xlab("Date") + ylab("Num Steps") +ggtitle("Data 3 - change NA's x mean")
+
+
+#calculate df for new Mean
+smeanData3<-aggregate(data3$steps, by=list(data3$date), FUN=mean)
+colnames(smeanData3)<-c("date","mean")
+print(smeanData3)
+#calculate df for new Median
+smedianData3<-aggregate(data3$steps, by=list(data3$date), FUN=median)
+colnames(smedianData3)<-c("date","median")
+print(smedianData3)
+
+
+
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
+```{r}
+
+#Create a new factor variable in the dataset with two levels - "weekday" 
+#and "weekend" indicating whether a given date is a weekday or weekend day.
+#change labels to english instead of the spanish labels in my machine
+Sys.setlocale("LC_TIME", "English")
+
+#create a new field on data with the weekday
+data1<-cbind(data,ifelse(weekdays(as.Date(data$date)) %in% c("Sunday","Saturday"), "weekend","weekday"))
+#change col names
+colnames(data1)<-c("steps","date","interval","weekend")
+
+data33<-cbind(data3,ifelse(weekdays(as.Date(data3$date)) %in% c("Sunday","Saturday"), "weekend","weekday"))
+#change col names
+colnames(data33)<-c("steps","date","interval","weekend")
+
+
+#select the correct subset to print
+weekDay<-data33[data33$weekend == "weekday",]
+weekEnd<-data33[data33$weekend == "weekend",]
+#intervals aggregates must be calculated
+weekDayMean<-aggregate(weekDay$steps, by=list(weekDay$interval), FUN=mean)
+weekEndMean<-aggregate(weekEnd$steps, by=list(weekEnd$interval), FUN=mean)
+#change column names
+colnames(weekDayMean)<-c("interval","mean")
+colnames(weekEndMean)<-c("interval","mean")
+
+
+plot1<-qplot(weekDayMean$interval,weekDayMean$mean,xlab="interval",ylab="Avg steps",geom="line",main="WeekDay")
+plot2<-qplot(weekEndMean$interval,weekEndMean$mean,xlab="interval",ylab="Avg steps",geom="line",main="WeekEnd")
+
+grid.arrange(plot1, plot2,ncol=1)
+
+
+```
+
+
