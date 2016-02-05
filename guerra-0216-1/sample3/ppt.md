@@ -1,0 +1,55 @@
+Infant.Mortality in Swissland. Regression from "swiss" dataset
+========================================================
+author: David Guerra
+date:   18/18/2014 
+
+Summary
+========================================================
+
+This shinyApp tries to help scientists studying
+the Infant. Mortality in Swissland with the "swiss" dataset.
+
+That app is running on the Shinyapp.io server on that link:
+
+http://dguerrar.shinyapps.io/project
+
+Source code can be found **OPEN** on github. 
+Feel free to copy, share and study at your own.
+
+https://github.com/dguerrar/dev_data_products
+
+
+Running the application
+========================================================
+
+Application can build a single or multi variable regression from the
+"swiss" data with a subset from the original data.
+
+
+- 1.- Select the 1st variable in order to create the Regression.
+- 2.- Optionally select the 2on variable for multivariate Regression.
+- 3.- Select # of records from the "swiss" dataset available for the application.
+
+The result will be Regression: $y= b0 + b1*x$ or $y= b0 + b1*x + b2*x^2$
+
+
+Sample Output
+========================================================
+
+
+```r
+library(datasets)
+data(swiss)
+swissData <- swiss
+fit<-lm(Infant.Mortality ~ Education + Fertility ,data = swissData)
+```
+
+```r
+par(mfrow=c(2,2))
+plot(fit,main="Infant.Mortality ~ Education + Fertility")
+```
+
+Sample Plot
+========================================================
+
+![plot of chunk unnamed-chunk-3](ppt-figure/unnamed-chunk-3.png) 
